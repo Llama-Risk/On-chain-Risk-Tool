@@ -1,5 +1,5 @@
 require("@chainlink/env-enc").config();
-// require('dotenv').config()
+require('dotenv').config()
 
 const { providers, Wallet } = require("ethers");
 
