@@ -1,5 +1,5 @@
 require("@chainlink/env-enc").config()
-// require('dotenv').config()
+require('dotenv').config()
 
 const DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS = 2;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
