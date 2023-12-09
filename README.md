@@ -10,4 +10,6 @@ For demonstration purposes, this risk simulation tool is designed to work with P
 - If Price Impact > VaR AND the contract is not paused, setPaused(True)
 - If Price Impact < VaR AND the contract is paused, setPaused(False)
 
-The source code that will be executed by Chainlink Functions is in `./source.js`. This is the code that gets sent on-chain and then onto the Chainlink Decentralized Oracle Network for decentralized execution.
+The source code that will be executed by Chainlink Functions is in `./source.js`. This is the code that gets sent on-chain and then onto the Chainlink Decentralized Oracle Network for decentralized execution. It queries data from the [PrismaMonitor API](https://api.prismamonitor.com/feeds-docs#/) which it filters and processes to produce the required VaR and Price Impact values. We also run the code in parallel and expose it via a [Railway API endpoint](https://backend-production-a412.up.railway.app). Source.js includes a fallback to query this API. 
+
+The consumer contract that will send requests to Chainlink Functions is in `./contract/llamaRiskConsumerContract.sol`. This contract receives values for VaR and Price Impact, which it uses to determine if the trigger condition has been met.
