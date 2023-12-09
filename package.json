@@ -12,6 +12,7 @@
     "@chainlink/functions-toolkit": "^0.2.6",
     "@types/node": "^20.6.2",
     "dotenv": "^16.3.1",
+    "ethers": "^5.7.2",
     "nodemon": "^3.0.1",
     "typescript": "^5.2.2"
   },

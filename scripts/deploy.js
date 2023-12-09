@@ -1,33 +1,43 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
-// will compile your contracts, add the Hardhat Runtime Environment's members to the
-// global scope, and execute the script.
-const hre = require("hardhat");
+const { wallet, signer } = require("../connection.js");
+const { abi, bytecode } = require("../artifacts/contracts/llamaRiskAutomatedConsumerContract.sol/llamaRiskAutomatedConsumerContract.json");
+const troveManagerJSON = require("../artifacts/contracts/TroveManager.sol/TroveManager.json")
+const { networks } = require("../network.js");
+const { ContractFactory, utils } = require("ethers");
 
-async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+const NETWORK = "polygonMumbai";
+const routerAddress = networks[NETWORK].functionsRouter;
+const donIdBytes32 = utils.formatBytes32String(networks[NETWORK].donId);
 
-  const lockedAmount = hre.ethers.parseEther("0.001");
+const deployTroveManager = async () => {
+  const contractFactory = new ContractFactory(troveManagerJSON.abi, troveManagerJSON.bytecode, wallet);
 
-  const lock = await hre.ethers.deployContract("Lock", [unlockTime], {
-    value: lockedAmount,
-  });
+  const functionsConsumerContract = await contractFactory
+    .connect(signer)
+    .deploy();
 
-  await lock.waitForDeployment();
+  await functionsConsumerContract.deployed();
+  console.log(`\nDeployed troveManager at address ${functionsConsumerContract.address}`)
+  return functionsConsumerContract.address
+};
 
-  console.log(
-    `Lock with ${ethers.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
-  );
-}
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+const deployFunctionsConsumerContract = async (troveManagerAddress) => {
+  console.log(`troveManager address is ${troveManagerAddress}`)
+  const contractFactory = new ContractFactory(abi, bytecode, wallet);
+
+  const functionsConsumerContract = await contractFactory
+    .connect(signer)
+    .deploy(routerAddress, troveManagerAddress);
+
+  await functionsConsumerContract.deployed();
+  console.log(`\nDeployed consumer at address ${functionsConsumerContract.address}`)
+  return functionsConsumerContract.address
+};
+
+deployTroveManager().then(
+    (troveManagerAddress) => {
+        deployFunctionsConsumerContract(troveManagerAddress).catch(err => {
+            console.log("Error deploying the Consumer Contract ", err);
+        });
+    }
+)

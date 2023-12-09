@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/FunctionsClient.sol";
 import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
+import {TroveManager} from "./TroveManager.sol";
 
 /**
  * @title Functions contract used for Automation.
@@ -19,6 +20,7 @@ contract llamaRiskAutomatedConsumerContract is FunctionsClient, ConfirmedOwner {
     bytes32 public s_lastRequestId;
     bytes public s_lastResponse;
     bytes public s_lastError;
+    TroveManager public troveManager;
 
     error NotAllowedCaller(
         address caller,
@@ -30,8 +32,11 @@ contract llamaRiskAutomatedConsumerContract is FunctionsClient, ConfirmedOwner {
     event Response(bytes32 indexed requestId, bytes response, bytes err);
 
     constructor(
-        address router
-    ) FunctionsClient(router) ConfirmedOwner(msg.sender) {}
+        address router,
+        address _troveManager
+    ) FunctionsClient(router) ConfirmedOwner(msg.sender) {
+        troveManager = TroveManager(_troveManager);
+    }
 
     /**
      * @notice Reverts if called by anyone other than the contract owner or automation registry.
